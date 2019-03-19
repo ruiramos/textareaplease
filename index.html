@@ -31,8 +31,13 @@
       font-weight:bold;
       float: left;
     }
-    .message-copy {
+    .message-copy,
+    .message-delete {
       float: right;
+    }
+    .message-delete a {
+      color: red !important;
+      padding-left:4px;
     }
     .message-content {
       clear: left;
@@ -56,6 +61,7 @@
   <div data-template="message">
     <hr/>
     <p class="message-date" data-bind="date" data-parse="date"></p>
+    <p class="message-delete"><a href="javascript:void(0);" data-hook="delete">delete (be careful)</a></p>
     <p class="message-copy"><a href="javascript:void(0);" data-hook="copy">copy to clipboard</a></p>
     <p class="message-content" data-bind="content"></p>
   </div>
@@ -126,6 +132,16 @@
         copyLink.addEventListener('click', () => {
           const content = JSON.parse(localStorage.getItem('saved'))[i].content;
           navigator.clipboard.writeText(content);
+        })
+      )
+
+      const deleteLinks = document.querySelectorAll('[data-hook=delete]');
+      deleteLinks.forEach((deleteLink, i) => 
+        deleteLink.addEventListener('click', () => {
+          let saved = JSON.parse(localStorage.getItem('saved'));
+          saved.splice(i, 1);
+          localStorage.setItem('saved', JSON.stringify(saved));
+          updateSaved(saved);
         })
       )
     }
