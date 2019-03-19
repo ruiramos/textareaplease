@@ -91,7 +91,7 @@
 
       let saved = JSON.parse(localStorage.getItem('saved') || '[]');
 
-      saved.push({
+      saved.unshift({
         content,
         date: new Date().getTime()
       });
@@ -106,7 +106,7 @@
 
     function updateSaved(saved){
       while(savedMessages.firstChild) savedMessages.removeChild(savedMessages.firstChild);
-      saved.reverse().forEach(message => {
+      saved.forEach(message => {
         let container = document.createElement('div');
         container.classList.add('saved-message');
         container.innerHTML = messageTemplate.innerHTML;
