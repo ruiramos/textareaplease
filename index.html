@@ -124,7 +124,7 @@
       copyLinks.forEach((copyLink, i) => 
         copyLink.addEventListener('click', () => {
           const content = JSON.parse(localStorage.getItem('saved'))[i].content;
-          window.copy(content);
+          navigator.clipboard.writeText(content);
         })
       )
     }
