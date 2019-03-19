@@ -3,25 +3,149 @@
 <head>
   <meta charset="UTF-8">
   <title>textarea please</title>
-<style>
-h1,h2 { 
-  text-align: center;
-}
-h2 {
-  font-weight: normal;
-}
-textarea {
-  width: 75%;
-  margin: 0px auto;
-  display: block;
-  height: 300px;
-
-}
-</style>
+  <style>
+    h1,h2 { 
+      text-align: center;
+    }
+    h2 {
+      font-weight: normal;
+    }
+    textarea {
+      width: 75%;
+      margin: 40px auto;
+      padding: 4px 6px;
+      font-size: 14px;
+      line-height: 1.5em;
+      display: block;
+      height: 300px;
+    }
+    .button-container {
+      display: block;
+      margin: 40px auto;
+      text-align: center;
+    }
+    .hide, [data-template] {
+      display: none;
+    }
+    .message-date {
+      font-weight:bold;
+      float: left;
+    }
+    .message-copy {
+      float: right;
+    }
+    .message-content {
+      clear: left;
+    }
+  </style>
 </head>
 <body>
   <h1>textareaplease.com</h1>
   <h2>sure, here:</h2>
   <textarea  autofocus></textarea>
+  <div class="button-container">
+    <button type="button" name="save">save for later and create another one</button>
+  </div>
+  <div data-hook="saved-messages"></div>
+  <div data-hook="delete-container">
+    <hr/>
+    <button type="button" name="delete">delete saved messages</button>
+  </div>
+  
+
+  <div data-template="message">
+    <hr/>
+    <p class="message-date" data-bind="date" data-parse="date"></p>
+    <p class="message-copy"><a href="javascript:void(0);" data-hook="copy">copy to clipboard</a></p>
+    <p class="message-content" data-bind="content"></p>
+  </div>
+
+  <script type="text/javascript">
+    const textarea = document.querySelector('textarea');
+    const saveButton = document.querySelector('button[name=save]');
+    const deleteButton = document.querySelector('button[name=delete]');
+    const deleteContainer = document.querySelector('[data-hook=delete-container]');
+
+    const savedMessages = document.querySelector('[data-hook=saved-messages]');
+    const messageTemplate = document.querySelector('[data-template=message]');
+
+    saveButton.addEventListener('click', saveContents, false);
+    deleteButton.addEventListener('click', deleteSaved, false);
+
+    const parsers = {
+      'date': date => new Date(date)
+    }
+
+    let contents;
+    if(localStorage && (contents = localStorage.getItem('saved'))){
+      contents = JSON.parse(contents);
+      updateSaved(contents);
+    }
+
+    function saveContents(){
+      if(!localStorage) return;
+
+      const content = textarea.value;
+
+      if(!content) return;
+
+      let saved = JSON.parse(localStorage.getItem('saved') || '[]');
+
+      saved.push({
+        content,
+        date: new Date().getTime()
+      });
+
+      localStorage.setItem('saved', JSON.stringify(saved));
+
+      updateSaved(saved);
+
+      textarea.value = '';
+      textarea.focus();
+    }
+
+    function updateSaved(saved){
+      while(savedMessages.firstChild) savedMessages.removeChild(savedMessages.firstChild);
+      saved.reverse().forEach(message => {
+        let container = document.createElement('div');
+        container.classList.add('saved-message');
+        container.innerHTML = messageTemplate.innerHTML;
+        $bind(container, message);
+        savedMessages.appendChild(container);
+      });
+
+      if(saved.length){
+        deleteContainer.classList.remove('hide');
+      } else {
+        deleteContainer.classList.add('hide');
+      }
+
+      const copyLinks = document.querySelectorAll('[data-hook=copy]');
+      copyLinks.forEach((copyLink, i) => 
+        copyLink.addEventListener('click', () => {
+          const content = JSON.parse(localStorage.getItem('saved'))[i].content;
+          window.copy(content);
+        })
+      )
+    }
+
+    function deleteSaved(){
+      if(window.confirm('Are you sure?')){
+        localStorage.setItem('saved', '[]');
+        updateSaved([]);
+      }
+    }
+
+    function $bind(el, data){
+      const els = el.querySelectorAll('[data-bind]');
+      Array.prototype.slice.call(els, 0).forEach(el => {
+        const attr = el.getAttribute('data-bind');
+        const parser = el.getAttribute('data-parse');
+        const value = parser ? parsers[parser](data[attr]) : data[attr];
+        el.innerText = value;
+      })
+    }
+
+  </script>
 </body>
 </html>
