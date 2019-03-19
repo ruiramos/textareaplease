@@ -44,7 +44,7 @@
   <h2>sure, here:</h2>
   <textarea  autofocus></textarea>
   <div class="button-container">
-    <button type="button" name="save">save for later and create another one</button>
+    <button type="button" name="save">save for later and create another one or cmd+enter</button>
   </div>
   <div data-hook="saved-messages"></div>
   <div data-hook="delete-container">
@@ -71,6 +71,7 @@
 
     saveButton.addEventListener('click', saveContents, false);
     deleteButton.addEventListener('click', deleteSaved, false);
+    textarea.addEventListener('keydown', textareaKeydown, false);
 
     const parsers = {
       'date': date => new Date(date)
@@ -134,6 +135,13 @@
         localStorage.setItem('saved', '[]');
         updateSaved([]);
       }
+    }
+
+    function textareaKeydown(e){
+      if(e.which === 13 && e.metaKey){
+        saveContents();
+      }
+      return true;
     }
 
     function $bind(el, data){
