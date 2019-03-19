@@ -87,6 +87,8 @@
     if(localStorage && (contents = localStorage.getItem('saved'))){
       contents = JSON.parse(contents);
       updateSaved(contents);
+    } else {
+      updateSaved([]);
     }
 
     function saveContents(){
