@@ -18,18 +18,18 @@
     }
     textarea {
       width: 75%;
-      margin: 40px auto;
+      margin: 40px auto 10px;
       padding: 4px 6px;
       font-size: 14px;
       line-height: 1.5em;
       display: block;
-      height: 300px;
-      max-height: 25vh;
+      height: 250px;
     }
-    .button-container {
+    .buttons-container {
+      width: 75%;
       display: block;
-      margin: 40px auto;
-      text-align: center;
+      margin: 0 auto 40px auto;
+      text-align: left;
     }
     .hide, [data-template] {
       display: none;
@@ -48,6 +48,17 @@
     }
     .message-content {
       clear: left;
+      max-height: 250px;
+      overflow: auto;
+    }
+    .pull-right {
+      float: right;
+    }
+    .error-container {
+      color: red;
+      text-align: center;
+      margin-top: -20px;
+      margin-bottom: 20px;
     }
   </style>
 </head>
@@ -55,9 +66,24 @@
   <h1>textareaplease.com</h1>
   <h2>sure, here:</h2>
   <textarea  autofocus></textarea>
-  <div class="button-container">
-    <button type="button" name="save">save for later and create another one or cmd+enter</button>
+  <div class="buttons-container">
+    <select name="operation">
+      <option value=""> -- common operations --</option>
+      <option value="format-json">format json</option>
+      <option value="format-sql">format sql</option>
+      <option value="format-html">format html</option>
+      <option value="encode">url encode</option>
+      <option value="decode">url decode</option>
+      <option value="html-encode">encode html entities</option>
+      <option value="html-decode">decode html entities</option>
+    </select>
+    <button type="button" name="do-action">perform</button>
+    <label>find: <input name="find" type="text" /></label>
+    <label>replace: <input name="replace" type="text" /></label>
+    <button type="button" name="do-find-replace">find &amp; replace</button>
+    <button type="button" name="save" class="pull-right">save to local storage and create new (cmd+enter)</button>
   </div>
+  <div class="error-container" data-hook="error-container"></div>
   <div data-hook="saved-messages"></div>
   <div data-hook="delete-container">
     <hr/>
@@ -73,21 +99,57 @@
     <p class="message-content" data-bind="content"></p>
   </div>
 
+  <script src="https://unpkg.com/he@1.2.0/he.js"></script>
+  <script src="https://unpkg.com/sql-formatter@1.2.0/dist/sql-formatter.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.9.0/beautify-html.js"></script>
+
   <script type="text/javascript">
     const textarea = document.querySelector('textarea');
     const saveButton = document.querySelector('button[name=save]');
     const deleteButton = document.querySelector('button[name=delete]');
+    const performButton = document.querySelector('button[name=do-action]');
+    const findReplaceButton = document.querySelector('button[name=do-find-replace]');
+
     const deleteContainer = document.querySelector('[data-hook=delete-container]');
+    const errorContainer = document.querySelector('[data-hook=error-container]');
+
+    const findInput = document.querySelector('input[name=find]');
+    const replaceInput = document.querySelector('input[name=replace]');
 
     const savedMessages = document.querySelector('[data-hook=saved-messages]');
     const messageTemplate = document.querySelector('[data-template=message]');
+    const actionSelect = document.querySelector('select[name=operation]');
 
     saveButton.addEventListener('click', saveContents, false);
     deleteButton.addEventListener('click', deleteSaved, false);
+    performButton.addEventListener('click', performAction, false);
+    findReplaceButton.addEventListener('click', findAndReplace, false);
     textarea.addEventListener('keydown', textareaKeydown, false);
 
     const parsers = {
       'date': date => new Date(date)
+    }
+
+    const actions = {
+      'format-json': (text) => {
+        try {
+          const json = JSON.parse(textarea.value);
+          return JSON.stringify(json, null, 2);
+        } catch(error){
+          showError(error)
+        }
+      },
+      'format-html': (text) => { return html_beautify(text); },
+      'format-sql': (text) => { return sqlFormatter.format(text); },
+      'encode': (text) => { return encodeURIComponent(text); },
+      'decode': (text) => { return decodeURIComponent(text); },
+      'html-encode': (text) => {
+        return he.encode(text);
+      },
+      'html-decode': (text) => {
+        var doc = new DOMParser().parseFromString(text, "text/html");
+        return doc.documentElement.textContent;
+      },
     }
 
     let contents;
@@ -169,6 +231,27 @@
       return true;
     }
 
+    function performAction(e){
+      let action = actionSelect.value;
+      showError('');
+      if(!action) return;
+      let result = actions[action](textarea.value);
+      if(result) textarea.value = result;
+    }
+
+    function showError(msg){
+      errorContainer.innerText = msg;
+    }
+
+    function findAndReplace(){
+      let find = findInput.value;
+      let replace = replaceInput.value;
+      if(!find) return;
+      let content = textarea.value;
+      while(content.indexOf(find) != -1) content = content.replace(find, replace);
+      textarea.value = content;
+    
+    }
     function $bind(el, data){
       const els = el.querySelectorAll('[data-bind]');
       Array.prototype.slice.call(els, 0).forEach(el => {
