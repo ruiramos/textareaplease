@@ -172,6 +172,14 @@
     const actionSelect = document.querySelector('select[name=operation]');
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
 
+    if(!window.SpeechRecognition){
+      dictateButton.style.display = 'none';
+    }
+
+    if(!window.speechSynthesis){
+      speakButton.style.display = 'none';
+    }
+
     saveButton.addEventListener('click', saveContents, false);
     copyButton.addEventListener('click', copyContents, false);
     deleteButton.addEventListener('click', deleteSaved, false);
