@@ -172,7 +172,7 @@
     const actionSelect = document.querySelector('select[name=operation]');
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
 
-    if(!window.SpeechRecognition){
+    if(!SpeechRecognition){
       dictateButton.style.display = 'none';
     }
 
