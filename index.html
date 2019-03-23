@@ -179,6 +179,7 @@
     const savedMessages = document.querySelector('[data-hook=saved-messages]');
     const messageTemplate = document.querySelector('[data-template=message]');
     const actionSelect = document.querySelector('select[name=operation]');
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
 
     if(!SpeechRecognition){
@@ -225,13 +226,12 @@
       },
       'tts': (text) => window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)),
       'stt': text => {
-        const recognition = new SpeechRecognition()
-        recognition.lang = 'en-gb' // Set this to the language of your choice
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-gb';
 
-        // Succesfully parsed result
         recognition.onresult = event => {
-          const last = event.results.length - 1
-          let result = event.results[last][0].transcript
+          const last = event.results.length - 1;
+          let result = event.results[last][0].transcript;
           if(textarea.value.length) result = ' '+result;
           textarea.value += result;
           updateLen();
@@ -240,20 +240,10 @@
         recognition.onspeechend = () => {
           recognition.stop();
           dictateButton.classList.remove('active');
-          console.log('Stopped recording!')
         }
 
-        recognition.onnomatch = event => {
-          // No match, do something
-        }
-
-        recognition.onerror = event => {
-          // Handle error
-        }
-
-        recognition.start()
+        recognition.start();
         dictateButton.classList.add('active');
-        console.log('Recording...')
       }
     }
 
@@ -302,11 +292,27 @@
 
     function updateSaved(saved){
       while(savedMessages.firstChild) savedMessages.removeChild(savedMessages.firstChild);
-      saved.forEach(message => {
+
+      const copyLinkSelector = '[data-hook=copy]';
+      const deleteLinkSelector = '[data-hook=delete]'
+
+      saved.forEach((message, i) => {
         let container = document.createElement('div');
         container.classList.add('saved-message');
         container.innerHTML = messageTemplate.innerHTML;
         $bind(container, message);
+
+        container.querySelector(copyLinkSelector).addEventListener('click', () => {
+          navigator.clipboard.writeText(message.content);
+        });
+
+        container.querySelector(deleteLinkSelector).addEventListener('click', () => {
+          let saved = JSON.parse(localStorage.getItem('saved'));
+          saved.splice(i, 1);
+          localStorage.setItem('saved', JSON.stringify(saved));
+          updateSaved(saved);
+        });
+
         savedMessages.appendChild(container);
       });
 
@@ -315,24 +321,6 @@
       } else {
         deleteContainer.classList.add('hide');
       }
-
-      const copyLinks = document.querySelectorAll('[data-hook=copy]');
-      copyLinks.forEach((copyLink, i) => 
-        copyLink.addEventListener('click', () => {
-          const content = JSON.parse(localStorage.getItem('saved'))[i].content;
-          navigator.clipboard.writeText(content);
-        })
-      )
-
-      const deleteLinks = document.querySelectorAll('[data-hook=delete]');
-      deleteLinks.forEach((deleteLink, i) => 
-        deleteLink.addEventListener('click', () => {
-          let saved = JSON.parse(localStorage.getItem('saved'));
-          saved.splice(i, 1);
-          localStorage.setItem('saved', JSON.stringify(saved));
-          updateSaved(saved);
-        })
-      )
     }
 
     function deleteSaved(){
@@ -372,8 +360,8 @@
       let content = textarea.value;
       while(content.indexOf(find) != -1) content = content.replace(find, replace);
       textarea.value = content;
-    
     }
+
     function $bind(el, data){
       const els = el.querySelectorAll('[data-bind]');
       Array.prototype.slice.call(els, 0).forEach(el => {
