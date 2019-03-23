@@ -103,6 +103,7 @@
         <option value="decode">url decode</option>
         <option value="html-encode">encode html entities</option>
         <option value="html-decode">decode html entities</option>
+        <option value="tts">speak (text to speech)</option>
       </select>
       <button type="button" name="do-action">perform</button>
       <span class="metrics">
@@ -116,8 +117,8 @@
       </div>
     </div>
     <div class="buttons-container-right">
-      <button type="button" name="save" >save to local storage and create new (cmd+enter)</button>
       <button type="button" name="copy" >copy to clipboard</button>
+      <button type="button" name="save" >save to local storage and create new (cmd+enter)</button>
     </div>
   </div>
   <div class="error-container" data-hook="error-container"></div>
@@ -165,7 +166,8 @@
     deleteButton.addEventListener('click', deleteSaved, false);
     performButton.addEventListener('click', performAction, false);
     findReplaceButton.addEventListener('click', findAndReplace, false);
-    textarea.addEventListener('keydown', textareaKeydown, false);
+    textarea.addEventListener('keyup', textareaKeyUp, false);
+    textarea.addEventListener('keydown', textareaKeyDown, false);
 
     const parsers = {
       'date': date => new Date(date)
@@ -191,6 +193,7 @@
         var doc = new DOMParser().parseFromString(text, "text/html");
         return doc.documentElement.textContent;
       },
+      'tts': (text) => window.speechSynthesis.speak(new SpeechSynthesisUtterance(text))
     }
 
     let contents;
@@ -270,13 +273,15 @@
       }
     }
 
-    function textareaKeydown(e){
+    function textareaKeyUp(e){
+      len.innerText = textarea.value.length;
+      wc.innerText = textarea.value.split(/\s+/).filter(s => !!s).length;
+    }
+
+    function textareaKeyDown(e){
       if(e.which === 13 && e.metaKey){
         saveContents();
       }
-      len.innerText = textarea.value.length;
-      wc.innerText = textarea.value.split(/\s+/).filter(s => !!s).length;
-      return true;
     }
 
     function performAction(e){
