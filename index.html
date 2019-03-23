@@ -69,7 +69,8 @@
     .saved-messages {
       clear: both;
     }
-    .find-replace-container {
+    .find-replace-container,
+    .speech-container {
       margin-top: 6px;
     }
     @media all and (max-width: 1000px){
@@ -84,6 +85,10 @@
         text-align: center;
         line-height: 2em;
       }
+    }
+    button.active {
+      background-color: blue;
+      color: white;
     }
   </style>
 </head>
@@ -103,7 +108,6 @@
         <option value="decode">url decode</option>
         <option value="html-encode">encode html entities</option>
         <option value="html-decode">decode html entities</option>
-        <option value="tts">speak (text to speech)</option>
       </select>
       <button type="button" name="do-action">perform</button>
       <span class="metrics">
@@ -114,6 +118,10 @@
         <label>find: <input name="find" type="text" /></label>
         <label>replace: <input name="replace" type="text" /></label>
         <button type="button" name="do-find-replace">find &amp; replace</button>
+      </div>
+      <div class="speech-container">
+        <button type="button" name="speak">speak (text to speech)</button>
+        <button type="button" name="dictate">dictate</button>
       </div>
     </div>
     <div class="buttons-container-right">
@@ -148,6 +156,8 @@
     const deleteButton = document.querySelector('button[name=delete]');
     const performButton = document.querySelector('button[name=do-action]');
     const findReplaceButton = document.querySelector('button[name=do-find-replace]');
+    const speakButton = document.querySelector('button[name=speak]');
+    const dictateButton = document.querySelector('button[name=dictate]');
 
     const deleteContainer = document.querySelector('[data-hook=delete-container]');
     const errorContainer = document.querySelector('[data-hook=error-container]');
@@ -160,13 +170,16 @@
     const savedMessages = document.querySelector('[data-hook=saved-messages]');
     const messageTemplate = document.querySelector('[data-template=message]');
     const actionSelect = document.querySelector('select[name=operation]');
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
 
     saveButton.addEventListener('click', saveContents, false);
     copyButton.addEventListener('click', copyContents, false);
     deleteButton.addEventListener('click', deleteSaved, false);
     performButton.addEventListener('click', performAction, false);
+    speakButton.addEventListener('click', speak, false);
+    dictateButton.addEventListener('click', dictate, false);
     findReplaceButton.addEventListener('click', findAndReplace, false);
-    textarea.addEventListener('keyup', textareaKeyUp, false);
+    textarea.addEventListener('input', updateLen, false);
     textarea.addEventListener('keydown', textareaKeyDown, false);
 
     const parsers = {
@@ -193,7 +206,38 @@
         var doc = new DOMParser().parseFromString(text, "text/html");
         return doc.documentElement.textContent;
       },
-      'tts': (text) => window.speechSynthesis.speak(new SpeechSynthesisUtterance(text))
+      'tts': (text) => window.speechSynthesis.speak(new SpeechSynthesisUtterance(text)),
+      'stt': text => {
+        const recognition = new SpeechRecognition()
+        recognition.lang = 'en-gb' // Set this to the language of your choice
+
+        // Succesfully parsed result
+        recognition.onresult = event => {
+          const last = event.results.length - 1
+          let result = event.results[last][0].transcript
+          if(textarea.value.length) result = ' '+result;
+          textarea.value += result;
+          updateLen();
+        }
+
+        recognition.onspeechend = () => {
+          recognition.stop();
+          dictateButton.classList.remove('active');
+          console.log('Stopped recording!')
+        }
+
+        recognition.onnomatch = event => {
+          // No match, do something
+        }
+
+        recognition.onerror = event => {
+          // Handle error
+        }
+
+        recognition.start()
+        dictateButton.classList.add('active');
+        console.log('Recording...')
+      }
     }
 
     let contents;
@@ -202,6 +246,14 @@
       updateSaved(contents);
     } else {
       updateSaved([]);
+    }
+
+    function speak(){
+      actions.tts(textarea.value);
+    }
+
+    function dictate(){
+      actions.stt(textarea.value);
     }
 
     function saveContents(){
@@ -273,7 +325,7 @@
       }
     }
 
-    function textareaKeyUp(e){
+    function updateLen(e){
       len.innerText = textarea.value.length;
       wc.innerText = textarea.value.split(/\s+/).filter(s => !!s).length;
     }
