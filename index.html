@@ -17,7 +17,7 @@
       font-weight: normal;
     }
     textarea {
-      width: 75%;
+      width: 85%;
       margin: 40px auto 10px;
       padding: 4px 6px;
       font-size: 14px;
@@ -26,10 +26,16 @@
       height: 250px;
     }
     .buttons-container {
-      width: 75%;
-      display: block;
+      width: 85%;
+      display: flex;
       margin: 0 auto 40px auto;
       text-align: left;
+    }
+    .buttons-container-left {
+      flex-grow: 1
+    }
+    .buttons-container-right {
+      text-align: right;
     }
     .hide, [data-template] {
       display: none;
@@ -47,12 +53,9 @@
       padding-left:4px;
     }
     .message-content {
-      clear: left;
+      clear: both;
       max-height: 250px;
       overflow: auto;
-    }
-    .pull-right {
-      float: right;
     }
     .error-container {
       color: red;
@@ -60,31 +63,62 @@
       margin-top: -20px;
       margin-bottom: 20px;
     }
+    .metrics {
+      color: #999;
+    }
+    .saved-messages {
+      clear: both;
+    }
+    .find-replace-container {
+      margin-top: 6px;
+    }
+    @media all and (max-width: 1000px){
+      .buttons-container {
+        flex-direction: column;
+      }
+      .buttons-container-right {
+        margin-top:10px;
+        text-align: center;
+        line-height: 2em;
+      }
+    }
   </style>
 </head>
+
 <body>
   <h1>textareaplease.com</h1>
   <h2>sure, here:</h2>
   <textarea  autofocus></textarea>
   <div class="buttons-container">
-    <select name="operation">
-      <option value=""> -- common operations --</option>
-      <option value="format-json">format json</option>
-      <option value="format-sql">format sql</option>
-      <option value="format-html">format html</option>
-      <option value="encode">url encode</option>
-      <option value="decode">url decode</option>
-      <option value="html-encode">encode html entities</option>
-      <option value="html-decode">decode html entities</option>
-    </select>
-    <button type="button" name="do-action">perform</button>
-    <label>find: <input name="find" type="text" /></label>
-    <label>replace: <input name="replace" type="text" /></label>
-    <button type="button" name="do-find-replace">find &amp; replace</button>
-    <button type="button" name="save" class="pull-right">save to local storage and create new (cmd+enter)</button>
+    <div class="buttons-container-left">
+      <select name="operation">
+        <option value=""> -- common operations --</option>
+        <option value="format-json">format json</option>
+        <option value="format-sql">format sql</option>
+        <option value="format-html">format html</option>
+        <option value="encode">url encode</option>
+        <option value="decode">url decode</option>
+        <option value="html-encode">encode html entities</option>
+        <option value="html-decode">decode html entities</option>
+      </select>
+      <button type="button" name="do-action">perform</button>
+      <span class="metrics">
+        <label>wc:</label> <span data-hook="wc">0</span>
+        <label>len:</label> <span data-hook="len">0</span>
+      </span>
+      <div class="find-replace-container">
+        <label>find: <input name="find" type="text" /></label>
+        <label>replace: <input name="replace" type="text" /></label>
+        <button type="button" name="do-find-replace">find &amp; replace</button>
+      </div>
+    </div>
+    <div class="buttons-container-right">
+      <button type="button" name="save" >save to local storage and create new (cmd+enter)</button>
+      <button type="button" name="copy" >copy to clipboard</button>
+    </div>
   </div>
   <div class="error-container" data-hook="error-container"></div>
-  <div data-hook="saved-messages"></div>
+  <div class="saved-messages" data-hook="saved-messages"></div>
   <div data-hook="delete-container">
     <hr/>
     <button type="button" name="delete">delete all saved messages</button>
@@ -106,12 +140,15 @@
   <script type="text/javascript">
     const textarea = document.querySelector('textarea');
     const saveButton = document.querySelector('button[name=save]');
+    const copyButton = document.querySelector('button[name=copy]');
     const deleteButton = document.querySelector('button[name=delete]');
     const performButton = document.querySelector('button[name=do-action]');
     const findReplaceButton = document.querySelector('button[name=do-find-replace]');
 
     const deleteContainer = document.querySelector('[data-hook=delete-container]');
     const errorContainer = document.querySelector('[data-hook=error-container]');
+    const wc = document.querySelector('[data-hook=wc]');
+    const len = document.querySelector('[data-hook=len]');
 
     const findInput = document.querySelector('input[name=find]');
     const replaceInput = document.querySelector('input[name=replace]');
@@ -121,6 +158,7 @@
     const actionSelect = document.querySelector('select[name=operation]');
 
     saveButton.addEventListener('click', saveContents, false);
+    copyButton.addEventListener('click', copyContents, false);
     deleteButton.addEventListener('click', deleteSaved, false);
     performButton.addEventListener('click', performAction, false);
     findReplaceButton.addEventListener('click', findAndReplace, false);
@@ -182,6 +220,11 @@
       textarea.focus();
     }
 
+    function copyContents(){
+      const content = textarea.value;
+      navigator.clipboard.writeText(content);
+    }
+
     function updateSaved(saved){
       while(savedMessages.firstChild) savedMessages.removeChild(savedMessages.firstChild);
       saved.forEach(message => {
@@ -228,6 +271,8 @@
       if(e.which === 13 && e.metaKey){
         saveContents();
       }
+      len.innerText = textarea.value.length;
+      wc.innerText = textarea.value.split(/\s+/).filter(s => !!s).length;
       return true;
     }
 
