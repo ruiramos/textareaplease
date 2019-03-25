@@ -90,6 +90,17 @@
       background-color: blue;
       color: white;
     }
+    .contact {
+      margin: 0;
+      background: #efefef;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      font-size:0.8em;
+      text-align: right;
+      padding: 6px 10px;
+    }
   </style>
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-38568098-7"></script>
@@ -129,14 +140,14 @@
         <button type="button" name="do-find-replace">find &amp; replace</button>
       </div>
       <div class="speech-container">
-        <button type="button" name="speak">speak (text to speech)</button>
+        <button type="button" name="speak">say (text to speech)</button>
         <button type="button" name="dictate">dictate</button>
       </div>
     </div>
     <div class="buttons-container-right">
       <button type="button" name="copy" >copy to clipboard</button>
       <button type="button" name="save" >save for later and create new (cmd+enter)</button>
-      <p><a class="contact" href="mailto:textarea@ruiramos.com">contact</a></p>
+      <p class="contact"><a href="mailto:textarea@ruiramos.com">request a feature, report a bug</a></p>
     </div>
   </div>
   <div class="error-container" data-hook="error-container"></div>
