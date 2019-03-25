@@ -121,13 +121,13 @@
     <div class="buttons-container-left">
       <select name="operation">
         <option value=""> -- common operations --</option>
-        <option value="format-json">format json</option>
-        <option value="format-sql">format sql</option>
-        <option value="format-html">format html</option>
-        <option value="encode">url encode</option>
-        <option value="decode">url decode</option>
-        <option value="html-encode">encode html entities</option>
-        <option value="html-decode">decode html entities</option>
+        <option value="format-json">format json (ctrl+j)</option>
+        <option value="format-sql">format sql (ctrl+s)</option>
+        <option value="format-html">format html (ctrl+h)</option>
+        <option value="encode">url encode (ctrl+u)</option>
+        <option value="decode">url decode (ctrl+U)</option>
+        <option value="html-encode">encode html entities (ctrl+e)</option>
+        <option value="html-decode">decode html entities (ctrl+E)</option>
       </select>
       <button type="button" name="do-action">perform</button>
       <span class="metrics">
@@ -348,13 +348,46 @@
     }
 
     function textareaKeyDown(e){
-      if(e.which === 13 && e.metaKey){
+      if(e.key === 'Enter' && e.metaKey){
         saveContents();
+      } else if(e.ctrlKey){
+        let selected;
+        switch(e.key){
+          case 'j':
+            selected = 'format-json'
+            break;
+          case 's':
+            selected = 'format-sql'
+            break;
+          case 'h':
+            selected = 'format-html'
+            break;
+          case 'u':
+            selected = 'encode'
+            break;
+          case 'U':
+            selected = 'decode'
+            break;
+          case 'e':
+            selected = 'html-encode'
+            break;
+          case 'E':
+            selected = 'html-decode'
+            break;
+        }
+        if(selected){
+          e.preventDefault();
+          callAction(selected)
+        }
       }
     }
 
     function performAction(e){
       let action = actionSelect.value;
+      callAction(action);
+    }
+
+    function callAction(action){
       showError('');
       if(!action) return;
       let result = actions[action](textarea.value);
