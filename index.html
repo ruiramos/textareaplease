@@ -128,6 +128,7 @@
         <option value="decode">url decode (ctrl+U)</option>
         <option value="html-encode">encode html entities (ctrl+e)</option>
         <option value="html-decode">decode html entities (ctrl+E)</option>
+        <option value="csv-to-table">csv to html table (ctrl+c)</option>
       </select>
       <button type="button" name="do-action">perform</button>
       <span class="metrics">
@@ -259,6 +260,30 @@
 
         recognition.start();
         dictateButton.classList.add('active');
+      },
+      'csv-to-table': (text) => {
+        let headers = text.slice(0, text.indexOf('\n'));
+        let rest = text.slice(text.indexOf('\n') + 1).split('\n');
+        
+        let table = '<table><thead><tr>';
+
+        headers.split(',').forEach(header => {
+          table += `<th>${header}</th>`;
+        })
+
+        table += '</tr></thead><tbody>';
+
+        rest.forEach(row => {
+          table += '<tr>';
+          row.split(',').forEach(cell => {
+            table += `<td>${cell}</td>`;
+          })
+          table += '</tr>';
+        })
+
+        table += '</tbody></table>';
+
+        return html_beautify(table);
       }
     }
 
@@ -376,6 +401,9 @@
             break;
           case 'E':
             selected = 'html-decode'
+            break;
+          case 'c':
+            selected = 'csv-to-table'
             break;
         }
         if(selected){
