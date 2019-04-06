@@ -16,7 +16,7 @@
     h2 {
       font-weight: normal;
     }
-    textarea {
+    textarea[data-hook=main] {
       width: 85%;
       margin: 40px auto 10px;
       padding: 4px 6px;
@@ -24,6 +24,11 @@
       line-height: 1.5em;
       display: block;
       height: 250px;
+    }
+    textarea[data-hook=custom-code]{
+      padding: 4px 6px;
+      font-size: 11px;
+      line-height: 1.25em;
     }
     .buttons-container {
       width: 85%;
@@ -33,6 +38,12 @@
     }
     .buttons-container-left {
       flex-grow: 1
+    }
+    .buttons-container-left > div {
+      margin: 8px 0;
+    }
+    .buttons-container-left > div:first-child {
+      margin-top: 0;
     }
     .buttons-container-right {
       text-align: right;
@@ -69,8 +80,7 @@
     .saved-messages {
       clear: both;
     }
-    .find-replace-container,
-    .speech-container {
+    .find-replace-container {
       margin-top: 6px;
     }
     @media all and (max-width: 1000px){
@@ -101,6 +111,9 @@
       padding: 0px 10px;
       line-height: 2.2em;
     }
+    .custom-code-container {
+      vertical-align:top;
+    }
   </style>
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-38568098-7"></script>
@@ -116,36 +129,42 @@
 <body>
   <h1>textareaplease.com</h1>
   <h2>sure, here:</h2>
-  <textarea  autofocus></textarea>
+  <textarea data-hook="main" autofocus></textarea>
   <div class="buttons-container">
     <div class="buttons-container-left">
-      <select name="operation">
-        <option value=""> -- common operations --</option>
-        <option value="format-json">format json (ctrl+j)</option>
-        <option value="format-sql">format sql (ctrl+s)</option>
-        <option value="format-html">format html (ctrl+h)</option>
-        <option value="encode">url encode (ctrl+u)</option>
-        <option value="decode">url decode (ctrl+U)</option>
-        <option value="html-encode">encode html entities (ctrl+e)</option>
-        <option value="html-decode">decode html entities (ctrl+E)</option>
-        <option value="csv-to-table">csv to html table (ctrl+c)</option>
-      </select>
-      <button type="button" name="do-action">perform</button>
-      <span class="metrics">
-        <label>wc:</label> <span data-hook="wc">0</span>
-        <label>len:</label> <span data-hook="len">0</span>
-      </span>
+      <div>
+        <select name="operation">
+          <option value=""> -- common operations --</option>
+          <option value="format-json">format json (ctrl+j)</option>
+          <option value="format-sql">format sql (ctrl+s)</option>
+          <option value="format-html">format html (ctrl+h)</option>
+          <option value="encode">url encode (ctrl+u)</option>
+          <option value="decode">url decode (ctrl+U)</option>
+          <option value="html-encode">encode html entities (ctrl+e)</option>
+          <option value="html-decode">decode html entities (ctrl+E)</option>
+          <option value="csv-to-table">csv to html table (ctrl+c)</option>
+        </select>
+        <button type="button" name="do-action">perform</button>
+        <span class="metrics">
+          <label>wc:</label> <span data-hook="wc">0</span>
+          <label>len:</label> <span data-hook="len">0</span>
+        </span>
+      </div>
       <div class="find-replace-container">
         <label>find: <input name="find" type="text" /></label>
         <label>replace: <input name="replace" type="text" /></label>
         <button type="button" name="do-find-replace">find &amp; replace</button>
       </div>
-      <div class="speech-container">
-        <button type="button" name="speak">say (text to speech)</button>
-        <button type="button" name="dictate">dictate</button>
+      <div class="custom-code-container">
+        <textarea data-hook="custom-code" rows="4" cols="70">text => { /*transform the text as you see fit */ 
+  return text.split('').map(c => String.fromCharCode(c.charCodeAt(0) + 1)).join('');
+}</textarea>
+        <button type="button" name="execute">execute custom js transform</button>
       </div>
     </div>
     <div class="buttons-container-right">
+      <button type="button" name="speak">say (text to speech)</button>
+      <button type="button" name="dictate">dictate</button>
       <button type="button" name="copy" >copy to clipboard</button>
       <button type="button" name="save" >save for later and create new (cmd+enter)</button>
       <p class="contact">
@@ -175,7 +194,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.9.0/beautify-html.js"></script>
 
   <script type="text/javascript">
-    const textarea = document.querySelector('textarea');
+    const textarea = document.querySelector('textarea[data-hook=main]');
     const saveButton = document.querySelector('button[name=save]');
     const copyButton = document.querySelector('button[name=copy]');
     const deleteButton = document.querySelector('button[name=delete]');
@@ -206,6 +225,9 @@
       speakButton.style.display = 'none';
     }
 
+    const customCodeArea = document.querySelector('textarea[data-hook=custom-code]');
+    const executeButton = document.querySelector('button[name=execute]');
+
     saveButton.addEventListener('click', saveContents, false);
     copyButton.addEventListener('click', copyContents, false);
     deleteButton.addEventListener('click', deleteSaved, false);
@@ -215,6 +237,7 @@
     findReplaceButton.addEventListener('click', findAndReplace, false);
     textarea.addEventListener('input', updateLen, false);
     textarea.addEventListener('keydown', textareaKeyDown, false);
+    executeButton.addEventListener('click', executeJs, false);
 
     const parsers = {
       'date': date => new Date(date)
@@ -438,6 +461,18 @@
       textarea.value = content;
     }
 
+    function executeJs(){
+      const script = customCodeArea.value;
+      const text = textarea.value;
+      try {
+        const transform = new Function("return "+script)();
+        textarea.value = transform(text);
+        showError('');
+      } catch(err){
+        showError(err);
+      }
+    }
+
     function $bind(el, data){
       const els = el.querySelectorAll('[data-bind]');
       Array.prototype.slice.call(els, 0).forEach(el => {
@@ -447,6 +482,7 @@
         el.innerText = value;
       })
     }
+
 
   </script>
 </body>
