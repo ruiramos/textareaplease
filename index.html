@@ -29,6 +29,8 @@
       padding: 4px 6px;
       font-size: 11px;
       line-height: 1.25em;
+      font-family: monospace;
+
     }
     .buttons-container {
       width: 85%;
@@ -156,7 +158,8 @@
         <button type="button" name="do-find-replace">find &amp; replace</button>
       </div>
       <div class="custom-code-container">
-        <textarea data-hook="custom-code" rows="4" cols="70">text => { /*transform the text as you see fit */ 
+        <textarea data-hook="custom-code" rows="4" cols="80">(text) => { 
+  /*transform the text as you see fit */ 
   return text.split('').map(c => String.fromCharCode(c.charCodeAt(0) + 1)).join('');
 }</textarea>
         <button type="button" name="execute">execute custom js transform</button>
