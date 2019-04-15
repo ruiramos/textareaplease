@@ -116,6 +116,17 @@
     .custom-code-container {
       vertical-align:top;
     }
+
+    span.separator {
+    }
+
+    span.separator:before {
+      content: '|';
+      font-weight: 400;
+      color: #999;
+      margin: 0 3px;
+    }
+
   </style>
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-38568098-7"></script>
@@ -147,6 +158,10 @@
           <option value="csv-to-table">csv to html table (ctrl+c)</option>
         </select>
         <button type="button" name="do-action">perform</button>
+        <span class="separator"></span>
+        <button type="button" name="speak">say (text to speech)</button>
+        <button type="button" name="dictate">dictate</button>
+        <span class="separator"></span>
         <span class="metrics">
           <label>wc:</label> <span data-hook="wc">0</span>
           <label>len:</label> <span data-hook="len">0</span>
@@ -166,8 +181,6 @@
       </div>
     </div>
     <div class="buttons-container-right">
-      <button type="button" name="speak">say (text to speech)</button>
-      <button type="button" name="dictate">dictate</button>
       <button type="button" name="copy" >copy to clipboard</button>
       <button type="button" name="save" >save for later and create new (cmd+enter)</button>
       <p class="contact">
