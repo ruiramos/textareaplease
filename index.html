@@ -123,7 +123,6 @@
     span.separator:before {
       content: '|';
       font-weight: 400;
-      color: #999;
       margin: 0 3px;
     }
 
@@ -173,9 +172,9 @@
         <button type="button" name="do-find-replace">find &amp; replace</button>
       </div>
       <div class="custom-code-container">
-        <textarea data-hook="custom-code" rows="4" cols="80">(text) => { 
+        <textarea data-hook="custom-code" rows="4" cols="60">(text) => { 
   /*transform the text as you see fit */ 
-  return text.split('').map(c => String.fromCharCode(c.charCodeAt(0) + 1)).join('');
+  return text.split('').join(' ');
 }</textarea>
         <button type="button" name="execute">execute custom js transform</button>
       </div>
