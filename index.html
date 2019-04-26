@@ -180,8 +180,9 @@
       </div>
     </div>
     <div class="buttons-container-right">
+      <button type="button" name="download">download</button>
       <button type="button" name="copy" >copy to clipboard</button>
-      <button type="button" name="save" >save for later and create new (cmd+enter)</button>
+      <button type="button" name="save" >save locally and create new (cmd+enter)</button>
       <p class="contact">
         <a href="https://github.com/ruiramos/textareaplease" target="_blank">github</a>
         <a href="mailto:textarea@ruiramos.com">request a feature/report a bug</a>
@@ -212,6 +213,7 @@
     const textarea = document.querySelector('textarea[data-hook=main]');
     const saveButton = document.querySelector('button[name=save]');
     const copyButton = document.querySelector('button[name=copy]');
+    const downloadButton = document.querySelector('button[name=download]');
     const deleteButton = document.querySelector('button[name=delete]');
     const performButton = document.querySelector('button[name=do-action]');
     const findReplaceButton = document.querySelector('button[name=do-find-replace]');
@@ -245,6 +247,7 @@
 
     saveButton.addEventListener('click', saveContents, false);
     copyButton.addEventListener('click', copyContents, false);
+    downloadButton.addEventListener('click', download, false);
     deleteButton.addEventListener('click', deleteSaved, false);
     performButton.addEventListener('click', performAction, false);
     speakButton.addEventListener('click', speak, false);
@@ -498,6 +501,19 @@
       })
     }
 
+    function download(){
+      var text = textarea.getElementById("my-textarea").value;
+      text = text.replace(/\n/g, "\r\n"); // To retain the Line breaks.
+      var blob = new Blob([text], { type: "text/plain"});
+      var anchor = document.createElement("a");
+      anchor.download = "my-filename.txt";
+      anchor.href = window.URL.createObjectURL(blob);
+      anchor.target ="_blank";
+      anchor.style.display = "none"; // just to be safe!
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+   }
 
   </script>
 </body>
