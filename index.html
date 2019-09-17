@@ -133,7 +133,6 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'UA-38568098-7');
 </script>
 </head>
@@ -181,6 +180,7 @@
     </div>
     <div class="buttons-container-right">
       <button type="button" name="download">download</button>
+      <button type="button" name="saveUrl">save to url</button>
       <button type="button" name="copy" >copy to clipboard</button>
       <button type="button" name="save" >save locally and create new (cmd+enter)</button>
       <p class="contact">
@@ -214,6 +214,7 @@
     const saveButton = document.querySelector('button[name=save]');
     const copyButton = document.querySelector('button[name=copy]');
     const downloadButton = document.querySelector('button[name=download]');
+    const saveUrlButton = document.querySelector('button[name=saveUrl]');
     const deleteButton = document.querySelector('button[name=delete]');
     const performButton = document.querySelector('button[name=do-action]');
     const findReplaceButton = document.querySelector('button[name=do-find-replace]');
@@ -242,12 +243,17 @@
       speakButton.style.display = 'none';
     }
 
+    if(window.location.hash){
+      textarea.innerHTML = decodeURIComponent(window.location.hash.slice(1));
+    }
+
     const customCodeArea = document.querySelector('textarea[data-hook=custom-code]');
     const executeButton = document.querySelector('button[name=execute]');
 
     saveButton.addEventListener('click', saveContents, false);
     copyButton.addEventListener('click', copyContents, false);
     downloadButton.addEventListener('click', download, false);
+    saveUrlButton.addEventListener('click', saveToUrl, false);
     deleteButton.addEventListener('click', deleteSaved, false);
     performButton.addEventListener('click', performAction, false);
     speakButton.addEventListener('click', speak, false);
@@ -515,6 +521,9 @@
       document.body.removeChild(anchor);
    }
 
+    function saveToUrl(){
+      window.location.hash = encodeURIComponent(textarea.value);
+    }
   </script>
 </body>
 </html>
