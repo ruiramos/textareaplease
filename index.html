@@ -202,6 +202,7 @@
           <option value="csv-to-table">csv to html table (ctrl+c)</option>
         </select>
         <button type="button" name="do-action">perform</button>
+        <button type="button" name="undo">undo</button>
         <span class="separator"></span>
         <button type="button" name="speak">say (text to speech)</button>
         <button type="button" name="dictate">dictate</button>
@@ -257,6 +258,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.9.0/beautify-html.js"></script>
 
   <script type="text/javascript">
+    const history = [];
+
     const textarea = document.querySelector('textarea[data-hook=main]');
     const saveButton = document.querySelector('button[name=save]');
     const copyButton = document.querySelector('button[name=copy]');
@@ -268,6 +271,7 @@
     const speakButton = document.querySelector('button[name=speak]');
     const dictateButton = document.querySelector('button[name=dictate]');
     const darkMode = document.querySelector('button[name=dm]');
+    const undoBtn = document.querySelector('button[name=undo]');
 
     const deleteContainer = document.querySelector('[data-hook=delete-container]');
     const errorContainer = document.querySelector('[data-hook=error-container]');
@@ -308,9 +312,11 @@
     dictateButton.addEventListener('click', dictate, false);
     findReplaceButton.addEventListener('click', findAndReplace, false);
     textarea.addEventListener('input', updateLen, false);
+    textarea.addEventListener('input', updateHistory, false);
     textarea.addEventListener('keydown', textareaKeyDown, false);
     executeButton.addEventListener('click', executeJs, false);
     darkMode.addEventListener('click', toggleDarkMode, false);
+    undoBtn.addEventListener('click', undo, false);
 
     const parsers = {
       'date': date => new Date(date)
@@ -483,6 +489,14 @@
       wc.innerText = textarea.value.split(/\s+/).filter(s => !!s).length;
     }
 
+    function updateHistory(e){
+      let v = textarea.value;
+      if(!history.length || v !== history[history.length - 1]){
+        history.push(v);
+      }
+      console.log(v, history)
+    }
+
     function textareaKeyDown(e){
       if(e.key === 'Enter' && e.metaKey){
         saveContents();
@@ -518,7 +532,7 @@
           e.preventDefault();
           callAction(selected)
         }
-      }
+      } 
     }
 
     function performAction(e){
@@ -530,7 +544,11 @@
       showError('');
       if(!action) return;
       let result = actions[action](textarea.value);
-      if(result) textarea.value = result;
+      if(result){
+        textarea.value = result;
+        history.push(textarea.value);
+        console.log(history);
+      }
     }
 
     function showError(msg){
@@ -599,7 +617,15 @@
     function splitUrl(text){
         let url = new URL(text);
         return {url: url.origin+url.pathname, params: new URLSearchParams(url.search)};
-      }
+    }
+
+    function undo(){
+      let el = history.pop();
+      if(el === textarea.value) el = history.pop();
+      textarea.value = el || '';
+      updateLen();
+      history.push(textarea.value);
+    }
 
   </script>
 </body>
