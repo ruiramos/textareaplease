@@ -203,6 +203,7 @@
         </select>
         <button type="button" name="do-action">perform</button>
         <button type="button" name="undo">undo</button>
+        <button type="button" name="redo">redo</button>
         <span class="separator"></span>
         <button type="button" name="speak">say (text to speech)</button>
         <button type="button" name="dictate">dictate</button>
@@ -259,6 +260,7 @@
 
   <script type="text/javascript">
     const history = [];
+    let redoHistory = [];
 
     const textarea = document.querySelector('textarea[data-hook=main]');
     const saveButton = document.querySelector('button[name=save]');
@@ -272,6 +274,7 @@
     const dictateButton = document.querySelector('button[name=dictate]');
     const darkMode = document.querySelector('button[name=dm]');
     const undoBtn = document.querySelector('button[name=undo]');
+    const redoBtn = document.querySelector('button[name=redo]');
 
     const deleteContainer = document.querySelector('[data-hook=delete-container]');
     const errorContainer = document.querySelector('[data-hook=error-container]');
@@ -317,6 +320,7 @@
     executeButton.addEventListener('click', executeJs, false);
     darkMode.addEventListener('click', toggleDarkMode, false);
     undoBtn.addEventListener('click', undo, false);
+    redoBtn.addEventListener('click', redo, false);
 
     const parsers = {
       'date': date => new Date(date)
@@ -494,7 +498,7 @@
       if(!history.length || v !== history[history.length - 1]){
         history.push(v);
       }
-      console.log(v, history)
+      redoHistory = [];
     }
 
     function textareaKeyDown(e){
@@ -547,7 +551,7 @@
       if(result){
         textarea.value = result;
         history.push(textarea.value);
-        console.log(history);
+        redoHistory = [];
       }
     }
 
@@ -620,8 +624,18 @@
     }
 
     function undo(){
+      if(!history.length) return;
+      redoHistory.push(textarea.value);
       let el = history.pop();
       if(el === textarea.value) el = history.pop();
+      textarea.value = el || '';
+      updateLen();
+      history.push(textarea.value);
+    }
+
+    function redo(){
+      if(!redoHistory.length) return;
+      let el = redoHistory.pop();
       textarea.value = el || '';
       updateLen();
       history.push(textarea.value);
