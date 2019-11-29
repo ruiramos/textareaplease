@@ -263,7 +263,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.9.0/beautify-html.js"></script>
 
   <script type="text/javascript">
-    const history = [];
+    let history = [];
     let redoHistory = [];
 
     const textarea = document.querySelector('textarea[data-hook=main]');
@@ -500,7 +500,7 @@
     function updateHistory(e){
       let v = textarea.value;
       if(!history.length || v !== history[history.length - 1]){
-        history.push(v);
+        saveToHistory(v);
       }
       redoHistory = [];
     }
@@ -554,7 +554,7 @@
       let result = actions[action](textarea.value);
       if(result){
         textarea.value = result;
-        history.push(textarea.value);
+        saveToHistory(textarea.value);
         redoHistory = [];
       }
     }
@@ -629,12 +629,15 @@
 
     function undo(){
       if(!history.length) return;
-      redoHistory.push(textarea.value);
+      if(redoHistory[redoHistory.length - 1] !== textarea.value){
+        redoHistory.push(textarea.value);
+      }
       let el = history.pop();
-      if(el === textarea.value) el = history.pop();
+      if(el === textarea.value && history.length) el = history.pop();
       textarea.value = el || '';
       updateLen();
-      history.push(textarea.value);
+      saveToHistory(textarea.value);
+      console.log(history);
     }
 
     function redo(){
@@ -642,7 +645,13 @@
       let el = redoHistory.pop();
       textarea.value = el || '';
       updateLen();
-      history.push(textarea.value);
+      saveToHistory(textarea.value);
+    }
+
+    function saveToHistory(v){
+      history.push(v);
+      history = history.slice(-10);
+      console.log(history);
     }
 
   </script>
