@@ -10,12 +10,37 @@
     html, body {
       font-size: 16px;
     }
+
+    body {
+      transition: background 250ms ease-in,
+        color 250ms ease-in;
+    }
+
+    body.dark-mode {
+      background: #121212;
+      color: #fafafa;
+    }
+
+    body.dark-mode button,
+    body.dark-mode select,
+    body.dark-mode input,
+    body.dark-mode textarea {
+      background: #121212;
+      color: #fafafa;
+    }
+
+    body.dark-mode a {
+      color: lightblue;
+    }
+
     h1,h2 { 
       text-align: center;
     }
+
     h2 {
       font-weight: normal;
     }
+
     textarea[data-hook=main] {
       width: 85%;
       margin: 40px auto 10px;
@@ -25,6 +50,7 @@
       display: block;
       height: 250px;
     }
+
     textarea[data-hook=custom-code]{
       padding: 4px 6px;
       font-size: 11px;
@@ -126,6 +152,13 @@
       margin: 0 3px;
     }
 
+    button.dm {
+      float: right;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+
   </style>
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-38568098-7"></script>
@@ -140,6 +173,7 @@
 <body>
   <h1>textareaplease.com</h1>
   <h2>sure, here:</h2>
+  <button class="dm" name="dm">*** DARK MODE! ***</button>
   <textarea data-hook="main" autofocus></textarea>
   <div class="buttons-container">
     <div class="buttons-container-left">
@@ -220,6 +254,7 @@
     const findReplaceButton = document.querySelector('button[name=do-find-replace]');
     const speakButton = document.querySelector('button[name=speak]');
     const dictateButton = document.querySelector('button[name=dictate]');
+    const darkMode = document.querySelector('button[name=dm]');
 
     const deleteContainer = document.querySelector('[data-hook=delete-container]');
     const errorContainer = document.querySelector('[data-hook=error-container]');
@@ -262,6 +297,7 @@
     textarea.addEventListener('input', updateLen, false);
     textarea.addEventListener('keydown', textareaKeyDown, false);
     executeButton.addEventListener('click', executeJs, false);
+    darkMode.addEventListener('click', toggleDarkMode, false);
 
     const parsers = {
       'date': date => new Date(date)
@@ -524,6 +560,17 @@
     function saveToUrl(){
       window.location.hash = encodeURIComponent(textarea.value);
     }
+
+    function toggleDarkMode(){
+      if(document.body.classList.contains('dark-mode')){
+        document.body.classList.remove('dark-mode');
+        darkMode.innerText = '*** DARK MODE ***';
+      } else {
+        document.body.classList.add('dark-mode');
+        darkMode.innerText = 'LIGHT MODE';
+      }
+    }
+
   </script>
 </body>
 </html>
