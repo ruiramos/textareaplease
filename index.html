@@ -194,7 +194,9 @@
           <option value="format-sql">format sql (ctrl+s)</option>
           <option value="format-html">format html (ctrl+h)</option>
           <option value="encode">url encode (ctrl+u)</option>
+          <option value="encode-qp">url encode query params only</option>
           <option value="decode">url decode (ctrl+U)</option>
+          <option value="decode-qp">url decode query params only</option>
           <option value="html-encode">encode html entities (ctrl+e)</option>
           <option value="html-decode">decode html entities (ctrl+E)</option>
           <option value="csv-to-table">csv to html table (ctrl+c)</option>
@@ -327,6 +329,18 @@
       'format-sql': (text) => { return sqlFormatter.format(text); },
       'encode': (text) => { return encodeURIComponent(text); },
       'decode': (text) => { return decodeURIComponent(text); },
+      'encode-qp': (text) => {
+        try {
+          let {url, params} = splitUrl(text);
+          return `${url}?${params.toString()}`
+        } catch(e){ return text; }
+      },
+      'decode-qp': (text) => { 
+        try {
+          let {url, params} = splitUrl(text);
+          return `${url}?${decodeURIComponent(params.toString())}`
+        } catch(e){ return text; }
+     },
       'html-encode': (text) => {
         return he.encode(text);
       },
@@ -581,6 +595,11 @@
         darkMode.innerText = 'LIGHT MODE';
       }
     }
+
+    function splitUrl(text){
+        let url = new URL(text);
+        return {url: url.origin+url.pathname, params: new URLSearchParams(url.search)};
+      }
 
   </script>
 </body>
