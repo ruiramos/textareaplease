@@ -11,9 +11,17 @@
       font-size: 16px;
     }
 
+    body.loading {
+      opacity: 0;
+    }
+
     body {
       transition: background 250ms ease-in,
         color 250ms ease-in;
+    }
+
+    body.dark-mode.now {
+      transition: none;
     }
 
     body.dark-mode, 
@@ -184,7 +192,7 @@
 </script>
 </head>
 
-<body>
+<body class="loading">
   <h1>textareaplease.com</h1>
   <h2>sure, here:</h2>
   <button class="dm" name="dm">*** DARK MODE! ***</button>
@@ -612,7 +620,12 @@
       window.location.hash = encodeURIComponent(textarea.value);
     }
 
-    function toggleDarkMode(){
+    function toggleDarkMode(now){
+      if(now === true){
+        document.body.classList.add('now');
+      } else {
+        document.body.classList.remove('now');
+      }
       if(document.body.classList.contains('dark-mode')){
         document.body.classList.remove('dark-mode');
         darkMode.innerText = '*** DARK MODE ***';
@@ -659,8 +672,10 @@
   <script type="text/javascript">
    const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
    if(isDarkMode){
-     document.body.classList.add('dark-mode')
+     toggleDarkMode(true);
    }
+
+   document.body.classList.remove('loading');
  </script>
 </body>
 </html>
