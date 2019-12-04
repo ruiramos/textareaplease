@@ -655,5 +655,12 @@
     }
 
   </script>
+
+  <script type="text/javascript">
+   const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+   if(isDarkMode){
+     document.body.classList.add('dark-mode')
+   }
+ </script>
 </body>
 </html>
