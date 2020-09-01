@@ -319,7 +319,7 @@
     }
 
     if(window.location.hash){
-      textarea.innerHTML = atob(decodeURIComponent(window.location.hash.slice(1)));
+      textarea.innerHTML = decodeURIComponent(atob(window.location.hash.slice(1)));
     }
 
     const customCodeArea = document.querySelector('textarea[data-hook=custom-code]');
