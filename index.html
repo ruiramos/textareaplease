@@ -213,6 +213,8 @@
           <option value="format-json">format json (ctrl+j)</option>
           <option value="format-sql">format sql (ctrl+s)</option>
           <option value="format-html">format html (ctrl+h)</option>
+          <option value="b64encode">base64 encode (ctrl+b)</option>
+          <option value="b64decode">base64 decode (ctrl+B)</option>
           <option value="encode">url encode (ctrl+u)</option>
           <option value="encode-qp">url encode query params only</option>
           <option value="decode">url decode (ctrl+U)</option>
@@ -357,6 +359,8 @@
       },
       'format-html': (text) => { return html_beautify(text); },
       'format-sql': (text) => { return sqlFormatter.format(text); },
+      'b64encode': (text) => { return window.btoa(text); },
+      'b64decode': (text) => { return window.atob(text); },
       'encode': (text) => { return encodeURIComponent(text); },
       'decode': (text) => { return decodeURIComponent(text); },
       'encode-qp': (text) => {
@@ -550,6 +554,12 @@
             break;
           case 'c':
             selected = 'csv-to-table'
+            break;
+          case 'b':
+            selected = 'b64encode'
+            break;
+          case 'B':
+            selected = 'b64decode'
             break;
         }
         if(selected){
