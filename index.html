@@ -277,7 +277,7 @@
   </div>
 
   <script src="https://unpkg.com/he@1.2.0/he.js"></script>
-  <script src="https://unpkg.com/sql-formatter@1.2.0/dist/sql-formatter.min.js"></script>
+  <script src="https://unpkg.com/sql-formatter@4.0.2/dist/sql-formatter.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.9.0/beautify-html.js"></script>
 
   <script type="text/javascript">
@@ -358,7 +358,7 @@
         }
       },
       'format-html': (text) => { return html_beautify(text); },
-      'format-sql': (text) => { return sqlFormatter.format(text); },
+          'format-sql': (text) => { return sqlFormatter.format(text, {language: 'postgresql', uppercase: true}); },
       'b64encode': (text) => { return window.btoa(text); },
       'b64decode': (text) => { return window.atob(text); },
       'encode': (text) => { return encodeURIComponent(text); },
